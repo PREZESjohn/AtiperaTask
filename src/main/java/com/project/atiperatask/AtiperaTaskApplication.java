@@ -13,9 +13,4 @@ public class AtiperaTaskApplication {
         SpringApplication.run(AtiperaTaskApplication.class, args);
     }
 
-    @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder builder) {
-        return builder.build();
-    }
-
 }

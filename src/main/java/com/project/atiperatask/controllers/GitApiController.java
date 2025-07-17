@@ -1,10 +1,12 @@
 package com.project.atiperatask.controllers;
 
+import com.project.atiperatask.models.RepositoryResp;
 import com.project.atiperatask.services.GitApiService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -17,12 +19,7 @@ public class GitApiController {
     }
 
     @GetMapping("/{userName}")
-    public ResponseEntity<?> getUserRepos(@PathVariable String userName) {
-        try{
-            return ResponseEntity.ok(gitApiService.userRepos(userName));
-        }catch (ResponseStatusException e){
-            Optional<String> t = Optional.of("{'status':'404','message':'User was not found.'}");
-            return ResponseEntity.of(t);
-        }
+    public List<RepositoryResp> getUserRepos(@PathVariable String userName) {
+        return gitApiService.userRepositories(userName);
     }
 }

@@ -1,15 +1,12 @@
 package com.project.atiperatask;
 
-import com.project.atiperatask.models.Repository;
+import com.project.atiperatask.models.RepositoryResp;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,21 +20,21 @@ public class GitApiControllerIntegrationTest {
     void shouldReturnRepositoriesWithBranchesForExistingUser() {
         String username = "octocat";
 
-        ResponseEntity<Repository[]> response = restTemplate.getForEntity("/api/v1/{username}", Repository[].class, username);
+        ResponseEntity<RepositoryResp[]> response = restTemplate.getForEntity("/api/v1/{username}", RepositoryResp[].class, username);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        List<Repository> repositories = Arrays.asList(response.getBody());
+        RepositoryResp[] repositories = response.getBody();
         assertThat(repositories).hasSizeGreaterThan(0);
 
         boolean hasHelloWorld = false;
-        for (Repository repo : repositories) {
-            if ("Hello-World".equals(repo.getRepoName())) {
+        for (RepositoryResp repo : repositories) {
+            if ("Hello-World".equals(repo.name())) {
                 hasHelloWorld = true;
-                assertThat(repo.getOwnerName()).isEqualTo("octocat");
-                assertThat(repo.getBranches()).isNotEmpty();
-                assertThat(repo.getBranches().get(0).getBranchName()).isNotBlank();
-                assertThat(repo.getBranches().get(0).getBranchLastCommitSha()).isNotBlank();
+                assertThat(repo.ownerName()).isEqualTo("octocat");
+                assertThat(repo.branches()).isNotEmpty();
+                assertThat(repo.branches().get(0).name()).isNotBlank();
+                assertThat(repo.branches().get(0).lastCommitSha()).isNotBlank();
                 break;
             }
         }

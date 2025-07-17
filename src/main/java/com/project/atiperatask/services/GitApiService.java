@@ -1,59 +1,29 @@
 package com.project.atiperatask.services;
 
-import com.project.atiperatask.models.Branch;
-import com.project.atiperatask.models.Repository;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.project.atiperatask.api.GithubApiClient;
+import com.project.atiperatask.models.RepositoryResp;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
 @Service
 public class GitApiService {
-    private final RestTemplate restTemplate;
+    private final GithubApiClient githubApiClient;
 
-    public GitApiService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public GitApiService(GithubApiClient githubApiClient) {
+        this.githubApiClient = githubApiClient;
     }
 
-    public List<Repository> userRepos(String userName){
-
-        String url = "https://api.github.com/users/"+userName+"/repos";
-        ResponseEntity<String> response;
-        try{
-            response = restTemplate.getForEntity(url, String.class);
-        }catch (HttpClientErrorException e){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        JSONArray jsonArray = new JSONArray(response.getBody());
-        List<Repository> repos = new ArrayList<>();
-        String branchesUrl;
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject objects = jsonArray.getJSONObject(i);
-            if(!objects.getBoolean("fork")){
-                branchesUrl=objects.getString("branches_url");
-                repos.add(new Repository(userName,objects.getString("name"),repoBranches(branchesUrl)));
+    public List<RepositoryResp> userRepositories(String username) {
+        List<JsonNode> repos = githubApiClient.getUserRepos(username);
+        List<RepositoryResp> reposResp = new ArrayList<>();
+        for (JsonNode repo : repos) {
+            if(!repo.get("fork").asBoolean()){
+                String repoName = repo.get("name").asText();
+                reposResp.add(new RepositoryResp(repoName,username, githubApiClient.getRepoBranches(username, repoName)));
             }
-
         }
-
-        return repos;
-    }
-
-    public List<Branch> repoBranches(String branchesUrl){
-        String branchesUrlStrip=branchesUrl.replaceAll("(?s)\\{.*?}", "");
-        ResponseEntity<String> response = restTemplate.getForEntity(branchesUrlStrip, String.class);
-        JSONArray jsonArray = new JSONArray(response.getBody());
-        List<Branch> tempBranches = new ArrayList<>();
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject objects = jsonArray.getJSONObject(i);
-            tempBranches.add(new Branch(objects.getString("name"),objects.getJSONObject("commit").getString("sha")));
-        }
-        return tempBranches;
+        return reposResp;
     }
 }
