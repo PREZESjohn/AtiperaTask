@@ -8,6 +8,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,21 +23,21 @@ public class GitApiControllerIntegrationTest {
     void shouldReturnRepositoriesWithBranchesForExistingUser() {
         String username = "octocat";
 
-        ResponseEntity<?> response = restTemplate.getForEntity("api/v1/{username}", Repository[].class, username);
+        ResponseEntity<Repository[]> response = restTemplate.getForEntity("/api/v1/{username}", Repository[].class, username);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        List<Repository> repositories = (List<Repository>) response.getBody();
+        List<Repository> repositories = Arrays.asList(response.getBody());
         assertThat(repositories).hasSizeGreaterThan(0);
 
         boolean hasHelloWorld = false;
         for (Repository repo : repositories) {
-            if ("hello-world".equals(repo.getRepoName())) {
+            if ("Hello-World".equals(repo.getRepoName())) {
                 hasHelloWorld = true;
                 assertThat(repo.getOwnerName()).isEqualTo("octocat");
                 assertThat(repo.getBranches()).isNotEmpty();
                 assertThat(repo.getBranches().get(0).getBranchName()).isNotBlank();
-                assertThat(repo.getBranches().get(0).getBranchLastCommitSsh()).isNotBlank();
+                assertThat(repo.getBranches().get(0).getBranchLastCommitSha()).isNotBlank();
                 break;
             }
         }

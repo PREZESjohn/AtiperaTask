@@ -2,18 +2,18 @@ package com.project.atiperatask.models;
 
 public class Branch {
     private String branchName;
-    private String branchLastCommitSsh;
+    private String branchLastCommitSha;
 
-    public Branch(String branchName, String branchLastCommitSsh) {
+    public Branch(String branchName, String branchLastCommitSha) {
         this.branchName = branchName;
-        this.branchLastCommitSsh = branchLastCommitSsh;
+        this.branchLastCommitSha = branchLastCommitSha;
     }
 
     public String getBranchName() {
         return branchName;
     }
 
-    public String getBranchLastCommitSsh() {
-        return branchLastCommitSsh;
+    public String getBranchLastCommitSha() {
+        return branchLastCommitSha;
     }
 }
