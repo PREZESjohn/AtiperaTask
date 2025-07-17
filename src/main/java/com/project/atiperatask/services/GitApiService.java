@@ -4,9 +4,12 @@ import com.project.atiperatask.models.Branch;
 import com.project.atiperatask.models.Repository;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -21,7 +24,12 @@ public class GitApiService {
     public List<Repository> userRepos(String userName){
 
         String url = "https://api.github.com/users/"+userName+"/repos";
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+        ResponseEntity<String> response;
+        try{
+            response = restTemplate.getForEntity(url, String.class);
+        }catch (HttpClientErrorException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
         JSONArray jsonArray = new JSONArray(response.getBody());
         List<Repository> repos = new ArrayList<>();
         String branchesUrl;
