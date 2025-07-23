@@ -15,8 +15,8 @@ import java.util.List;
 public class GithubApiClient {
     private final RestClient restClient;
 
-    public GithubApiClient(RestClient.Builder restClientBuilder) {
-        this.restClient = restClientBuilder.baseUrl("https://api.github.com").build();
+    public GithubApiClient(RestClient restClient) {
+        this.restClient = restClient;
     }
 
     public List<JsonNode> getUserRepos(String username){
