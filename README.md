@@ -1,52 +1,52 @@
 # Custom GitHub API
 
-Aplikacja Spring Boot dostarczająca REST API dla listy nie fork'owanych repozytoriów danego użytkownika wraz z ich gałęziami oraz kodami sha ostatnich commit'ów. Używa GitHub API v3 (https://api.github.com). Dla nie istniejących użytkowników zwraca odpowiedź 404 z odpowiedzą zwrotną.
+This is a Spring Boot application that provides a REST API to list all non-fork repositories for a given GitHub user, including repository names, owner logins, and branch details (branch name and last commit SHA). It uses the GitHub API (v3) at https://api.github.com as the backing service. For non-existing users, it returns a 404 response with a structured error message.
 
 ## Features
-- **Endpoint**: `GET /api/v1/{username}`
-- **Odpowiedź**:  Zwraca tablice JSON repozytoriów w formacie:
-  - Nazwa repozytorium
-  - Nazwa własciciela repozytoriun
-  - Lista nazw gałęzi z ich kodami sha ostatnich commit'ów
-- **Obsługa błędów**: Zwraca odpowiedż z kodem 404 dla nieistniejącego użytkownika:
+- **Endpoint**: `GET /api/github/users/{username}/repos`
+- **Response**: Returns a JSON array of repositories (excluding forks) with:
+    - Repository name
+    - Owner login
+    - List of branches with their names and last commit SHAs
+- **Error Handling**: Returns a 404 response for non-existing users in the format:
   ```json
   {
       "status": 404,
       "message": "User {username} not found"
   }
   ```
-- **Test integracyjny**: Test weryfikujący 'happy path' dla poprawnej nazwy użytkownika ("oktocat"), sprawdzający szczegóły repozytorium i gałęzi.
+- **Integration Test**: Includes a single integration test verifying the happy path for a valid user (`octocat`), checking repository details and branch information without mocks.
 - 
-## Wymagane
+## Prerequisites
 - Java 21
 - Maven 3.8+
-- Dostęp do internetu by uzyskać dostęp do GitHub API (`https://api.github.com`)
+- Internet access to connect to the GitHub API (`https://api.github.com`)
 
 ## Setup
-1. Sklonuj repozytorium:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/github-repos.git
    ```
-   git clone https://github.com/PREZESjohn/AtiperaTask.git
+2. Navigate to the project directory:
+   ```bash
+   cd github-repos
    ```
-2. Przejdż do folderu aplikacji:
-   ```
-   cd AtiperaTask
-   ```
-3. Zbuduj aplikacje:
-   ```
+3. Build the project:
+   ```bash
    mvn clean install
    ```
-4. Uruchom aplikacje:
-   ```
+4. Run the application:
+   ```bash
    mvn spring-boot:run
    ```
 
-## Użycie
-- **Endpoint**: Zrób żądanie GET na:
+## Usage
+- **Endpoint**: Make a GET request to:
   ```
-  http://localhost:8080/api/v1/{username}
+  http://localhost:8080/api/github/users/{username}/repos
   ```
-  Zamień `{username}` na poprawną nazwę użytkownika GitHub (np., `octocat`).
-- **Przykładowa odpowiedź** (dla `octocat`):
+  Replace `{username}` with a valid GitHub username (e.g., `octocat`).
+- **Example Response** (for `octocat`):
   ```json
   [
       {
@@ -61,7 +61,7 @@ Aplikacja Spring Boot dostarczająca REST API dla listy nie fork'owanych repozyt
       }
   ]
   ```
-- **Błąd** (dla nieistniejącego użyytkownika):
+- **Error Response** (for non-existing user):
   ```json
   {
       "status": 404,
@@ -69,14 +69,24 @@ Aplikacja Spring Boot dostarczająca REST API dla listy nie fork'owanych repozyt
   }
   ```
 
-## Testowanie
-Projekt zawiera test integracyjny (`GitApiControllerIntegrationTest`) który weryfikuje:
-- Przypadek użycia dla żądania: `/api/v1/octocat`.
-- **Założenia**:
-    - Status odpowiedzi tp `200 OK`.
-    - Zwraca przynajmniej jedno repozytorium (dla użyktownika octocat ma zwrócić repozytorium `hello-world`).
-  - Sprawdza nazwe repozytorium, nazwę właściciela (`octocat`) i przynajmniej jedną gałęź wraz z kodem sha.
-- Testy uruchamia sie przy użyciu polecenia:
+## Testing
+The project includes a single integration test (`GithubControllerIntegrationTest`) that verifies the happy path:
+- **Test Case**: Makes a GET request to `/api/github/users/octocat/repos`.
+- **Assertions**:
+    - Response status is `200 OK`.
+    - Returns at least one repository (e.g., `hello-world`).
+    - Verifies repository name, owner login (`octocat`), and at least one branch with a valid name and commit SHA.
+- Run tests with:
   ```
   mvn test
   ```
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first
+to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
