@@ -2,10 +2,12 @@ package com.project.atiperatask.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.project.atiperatask.api.GithubApiClient;
+import com.project.atiperatask.models.RepositoryReq;
 import com.project.atiperatask.models.RepositoryResp;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class GitApiService {
@@ -16,14 +18,15 @@ public class GitApiService {
     }
 
     public List<RepositoryResp> userRepositories(String username) {
-        List<JsonNode> repos = githubApiClient.getUserRepos(username);
-        List<RepositoryResp> reposResp = new ArrayList<>();
-        for (JsonNode repo : repos) {
-            if(!repo.get("fork").asBoolean()){
-                String repoName = repo.get("name").asText();
-                reposResp.add(new RepositoryResp(repoName,username, githubApiClient.getRepoBranches(username, repoName)));
-            }
-        }
+        var repos = githubApiClient.getUserRepos(username);
+        List<RepositoryResp> reposResp = repos.stream()
+                .filter(repositoryReq -> !repositoryReq.fork())
+                .map(repositoryReq ->
+                        new RepositoryResp(
+                                repositoryReq.name(),
+                                repositoryReq.ownerName().login(),
+                                githubApiClient.getRepoBranches(repositoryReq.ownerName().login(), repositoryReq.name())))
+                .toList();
         return reposResp;
     }
 }
